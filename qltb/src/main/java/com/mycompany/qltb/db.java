@@ -22,6 +22,8 @@ import java.sql.Statement;
  * @author LanAnh
  */
 public class db {
+
+   
      private String host;
     private String port;
     private String dbName;
@@ -32,7 +34,7 @@ public class db {
     public db() {
         host = "localhost";
         port = "3306";
-        dbName = "qltb";
+        dbName = "qltb_thpt";
         url = "jdbc:mysql://" + host + ":" + port + "/" + dbName
                 + "?useSSL=false&serverTimezone=UTC";
         userName = "root";
