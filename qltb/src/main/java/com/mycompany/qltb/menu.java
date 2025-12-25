@@ -11,11 +11,11 @@ package com.mycompany.qltb;
 
 
 import javax.swing.*;
-import java.awt.event.ActionListener;
+
 
 public class menu {
 
-    public static JMenuBar createMainMenuBar(Runnable onNhapFile, Runnable onXuatFileTB, Runnable onXuatPhieuMuon,
+    public static JMenuBar createMainMenuBar(Runnable onNhapFile, Runnable onXuatFileTB,Runnable onLapPhieuMuon, Runnable onXuatPhieuMuon,
                                              Runnable onOpenSinhVien, Runnable onOpenPhong, Runnable onOpenLopTinChi) {
         JMenuBar bar = new JMenuBar();
 
@@ -32,6 +32,10 @@ public class menu {
 
         // Menu "Phiếu mượn"
         JMenu menuPhieuMuon = new JMenu("Phiếu mượn");
+        JMenuItem itemLapPhieu = new JMenuItem("Lập phiếu mượn");
+        itemLapPhieu.addActionListener(e -> onLapPhieuMuon.run());
+        menuPhieuMuon.add(itemLapPhieu);
+        
         JMenuItem itemXuatPhieuMuon = new JMenuItem("Xuất file");
         itemXuatPhieuMuon.addActionListener(e -> onXuatPhieuMuon.run());
         menuPhieuMuon.add(itemXuatPhieuMuon);

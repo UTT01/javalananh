@@ -40,6 +40,31 @@ public class trangthai_dao {
         }
         return list;
     }
+    // Phương thức lấy chỉ trạng thái Sẵn sàng (1) và Không sẵn sàng (2) cho quản lý thiết bị
+    public List<trangthai> getTrangThaiQuanLy() {
+        List<trangthai> list = new ArrayList<>();
+        String sql = "SELECT * FROM trangthai WHERE matinhtrang IN (1, 2)";
+
+        try {
+            db database = new db();
+            Connection c = database.getConnection();
+            Statement st = c.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+                list.add(new trangthai(
+                        rs.getInt("matinhtrang"),
+                        rs.getString("tentinhtrang"),
+                        rs.getString("mota")
+                ));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     public trangthai findByTen(String ten) {
     String sql = "SELECT * FROM trangthai WHERE tentinhtrang = ?";
 
