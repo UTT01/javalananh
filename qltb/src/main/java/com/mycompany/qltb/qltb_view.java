@@ -58,7 +58,7 @@ public class qltb_view extends JFrame {
     public JComboBox<trangthai> cbotrangthai;
 
     // Các ô nhập liệu cho sản phẩm
-    public JTextField txtId, txtName, txtSoLuong;
+    public JTextField txtId, txtName, txtSoLuongTot, txtSoLuongHong;
 
 
     // Các nút bấm quản lý sản phẩm
@@ -156,8 +156,8 @@ public class qltb_view extends JFrame {
         JPanel right = new JPanel(new BorderLayout());                 // Panel phải dùng BorderLayout
         right.setBorder(BorderFactory.createTitledBorder("Thông tin chi tiết")); // Viền có tiêu đề
 
-        // Tạo mô hình bảng với 5 cột, không cho chỉnh sửa ô trực tiếp
-        tableModelSp = new DefaultTableModel(new String[]{"Mã thiết bị","Tên thiết bị ","Danh mục","Trạng thái","Số lượng"}, 0) {
+        // Tạo mô hình bảng với 7 cột, không cho chỉnh sửa ô trực tiếp
+        tableModelSp = new DefaultTableModel(new String[]{"Mã thiết bị","Tên thiết bị ","Danh mục","Trạng thái","SL Tốt","SL Hỏng","Tổng SL"}, 0) {
             @Override 
             public boolean isCellEditable(int row, int col) { 
                 return false;                                         // Không cho edit ô trong bảng
@@ -182,20 +182,22 @@ public class qltb_view extends JFrame {
         spTable.setPreferredSize(new Dimension(0, 300));              // Chiều cao bảng khoảng 250px
         right.add(spTable, BorderLayout.NORTH);                       // Đặt bảng ở phía trên panel phải
 
-        // Form nhập liệu sản phẩm (lưới 5 hàng x 2 cột)
-        JPanel form = new JPanel(new GridLayout(5, 2, 2, 10));
+        // Form nhập liệu sản phẩm (lưới 6 hàng x 2 cột)
+        JPanel form = new JPanel(new GridLayout(6, 2, 2, 10));
         cboCategory = new JComboBox<>();                              // ComboBox chọn danh mục
 
         txtId = new JTextField();                                     // Ô nhập mã thiết bị
         txtName = new JTextField();                                   // Ô nhập tên thiết bị
-        txtSoLuong = new JTextField();                                // Ô nhập số lượng
+        txtSoLuongTot = new JTextField();                             // Ô nhập số lượng tốt
+        txtSoLuongHong = new JTextField();                            // Ô nhập số lượng hỏng
         cbotrangthai = new JComboBox<>();                               // ComboBox chọn trạng thái
 
         // Thêm các nhãn và ô nhập vào form
         form.add(new JLabel("Danh mục thiết bị:")); form.add(cboCategory);
         form.add(new JLabel("Mã thiết bị :"));     form.add(txtId);
         form.add(new JLabel("Tên thiết :"));       form.add(txtName);
-        form.add(new JLabel("Số lượng :"));        form.add(txtSoLuong);
+        form.add(new JLabel("SL Tốt :"));          form.add(txtSoLuongTot);
+        form.add(new JLabel("SL Hỏng :"));         form.add(txtSoLuongHong);
         form.add(new JLabel("Trạng thái :"));      form.add(cbotrangthai);
 
         right.add(form, BorderLayout.CENTER);                         // Đặt form vào giữa panel phải
@@ -209,22 +211,28 @@ public class qltb_view extends JFrame {
         btnthem.addActionListener(e -> {
     String maTB = txtId.getText().trim();
     String tenTB = txtName.getText().trim();
-    String soLuongStr = txtSoLuong.getText().trim();
+    String soLuongTotStr = txtSoLuongTot.getText().trim();
+    String soLuongHongStr = txtSoLuongHong.getText().trim();
     dmtb_thuoctinh loai = (dmtb_thuoctinh) cboCategory.getSelectedItem();
     trangthai tt = (trangthai) cbotrangthai.getSelectedItem();
 
     // 1. Kiểm tra rỗng
-    if (maTB.isEmpty() || tenTB.isEmpty() || soLuongStr.isEmpty() || loai == null || tt == null) {
+    if (maTB.isEmpty() || tenTB.isEmpty() || soLuongTotStr.isEmpty() || soLuongHongStr.isEmpty() || loai == null || tt == null) {
         JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!");
         return;
     }
 
     // 2. Kiểm tra số lượng hợp lệ
-    int soLuong = 0;
+    int soLuongTot = 0, soLuongHong = 0;
     try {
-        soLuong = Integer.parseInt(soLuongStr);
-        if (soLuong <= 0) {
-            JOptionPane.showMessageDialog(this, "Số lượng phải lớn hơn 0!");
+        soLuongTot = Integer.parseInt(soLuongTotStr);
+        soLuongHong = Integer.parseInt(soLuongHongStr);
+        if (soLuongTot < 0 || soLuongHong < 0) {
+            JOptionPane.showMessageDialog(this, "Số lượng không được âm!");
+            return;
+        }
+        if (soLuongTot + soLuongHong == 0) {
+            JOptionPane.showMessageDialog(this, "Tổng số lượng phải lớn hơn 0!");
             return;
         }
     } catch (NumberFormatException ex) {
@@ -234,22 +242,23 @@ public class qltb_view extends JFrame {
 
     qltb_dao dao = new qltb_dao();
 
-    // 2. Kiểm tra trùng mã
+    // 3. Kiểm tra trùng mã
     if (dao.isExist(maTB)) {
         JOptionPane.showMessageDialog(this, "Mã thiết bị đã tồn tại!");
         return;
     }
 
-    // 3. Tạo đối tượng thiết bị
+    // 4. Tạo đối tượng thiết bị
     qltb_thuoctinh tb = new qltb_thuoctinh();
     tb.setMaTB(maTB);
     tb.setTenTB(tenTB);
     tb.setMaLoai(loai.getMaloai());
     tb.setTrangThai(tt.getMaTinhTrang());
-    tb.setSoLuong(soLuong);
+    tb.setSoLuongTot(soLuongTot);
+    tb.setSoLuongHong(soLuongHong);
     tb.setGhiChu("");
 
-    // 4. Thêm vào CSDL
+    // 5. Thêm vào CSDL
     if (dao.insert(tb)) {
         JOptionPane.showMessageDialog(this, "Thêm thiết bị thành công!");
         loadtb(); // load lại JTable
@@ -269,22 +278,28 @@ public class qltb_view extends JFrame {
 
     String maTB = txtId.getText().trim();
     String tenTB = txtName.getText().trim();
-    String soLuongStr = txtSoLuong.getText().trim();
+    String soLuongTotStr = txtSoLuongTot.getText().trim();
+    String soLuongHongStr = txtSoLuongHong.getText().trim();
     dmtb_thuoctinh loai = (dmtb_thuoctinh) cboCategory.getSelectedItem();
     trangthai tt = (trangthai) cbotrangthai.getSelectedItem();
 
     // Kiểm tra rỗng
-    if (tenTB.isEmpty() || soLuongStr.isEmpty() || loai == null || tt == null) {
+    if (tenTB.isEmpty() || soLuongTotStr.isEmpty() || soLuongHongStr.isEmpty() || loai == null || tt == null) {
         JOptionPane.showMessageDialog(this, "Dữ liệu không hợp lệ!");
         return;
     }
 
     // Kiểm tra số lượng hợp lệ
-    int soLuong = 0;
+    int soLuongTot = 0, soLuongHong = 0;
     try {
-        soLuong = Integer.parseInt(soLuongStr);
-        if (soLuong <= 0) {
-            JOptionPane.showMessageDialog(this, "Số lượng phải lớn hơn 0!");
+        soLuongTot = Integer.parseInt(soLuongTotStr);
+        soLuongHong = Integer.parseInt(soLuongHongStr);
+        if (soLuongTot < 0 || soLuongHong < 0) {
+            JOptionPane.showMessageDialog(this, "Số lượng không được âm!");
+            return;
+        }
+        if (soLuongTot + soLuongHong == 0) {
+            JOptionPane.showMessageDialog(this, "Tổng số lượng phải lớn hơn 0!");
             return;
         }
     } catch (NumberFormatException ex) {
@@ -297,7 +312,8 @@ public class qltb_view extends JFrame {
     tb.setTenTB(tenTB);
     tb.setMaLoai(loai.getMaloai());
     tb.setTrangThai(tt.getMaTinhTrang());
-    tb.setSoLuong(soLuong);
+    tb.setSoLuongTot(soLuongTot);
+    tb.setSoLuongHong(soLuongHong);
     tb.setGhiChu("");
 
     qltb_dao dao = new qltb_dao();
@@ -398,9 +414,11 @@ public class qltb_view extends JFrame {
         tableModelSp.addRow(new Object[]{
             tb.getMaTB(),
             tb.getTenTB(),
-            tb.gettenLoai(),     // hoặc tb.getMaLoai()
-            tb.gettenTrangThai(), // hoặc tb.getTrangThai()
-            tb.getSoLuong()      // Hiển thị số lượng
+            tb.gettenLoai(),        // hoặc tb.getMaLoai()
+            tb.gettenTrangThai(),   // hoặc tb.getTrangThai()
+            tb.getSoLuongTot(),     // Số lượng tốt
+            tb.getSoLuongHong(),    // Số lượng hỏng
+            tb.getTongSoLuong()     // Tổng số lượng
         });
     } 
 }
@@ -410,12 +428,14 @@ public class qltb_view extends JFrame {
     String tenTB = tableSp.getValueAt(row, 1).toString();
     String tenLoai = tableSp.getValueAt(row, 2).toString();
     String tenTrangThai = tableSp.getValueAt(row, 3).toString();
-    String soLuong = tableSp.getValueAt(row, 4).toString();
+    String soLuongTot = tableSp.getValueAt(row, 4).toString();
+    String soLuongHong = tableSp.getValueAt(row, 5).toString();
 
     // Đẩy lên TextField
     txtId.setText(maTB);
     txtName.setText(tenTB);
-    txtSoLuong.setText(soLuong);
+    txtSoLuongTot.setText(soLuongTot);
+    txtSoLuongHong.setText(soLuongHong);
 
     // Set lại ComboBox danh mục
     for (int i = 0; i < cboCategory.getItemCount(); i++) {
@@ -436,7 +456,8 @@ public class qltb_view extends JFrame {
 private void clearForm() {
     txtId.setText("");
     txtName.setText("");
-    txtSoLuong.setText("");
+    txtSoLuongTot.setText("");
+    txtSoLuongHong.setText("");
     cboCategory.setSelectedIndex(-1);
     cbotrangthai.setSelectedIndex(-1);
 }
@@ -453,7 +474,9 @@ private void clearForm() {
             tb.getTenTB(),
             tb.gettenLoai(),
             tb.gettenTrangThai(),
-            tb.getSoLuong()
+            tb.getSoLuongTot(),
+            tb.getSoLuongHong(),
+            tb.getTongSoLuong()
         });
     }
 }

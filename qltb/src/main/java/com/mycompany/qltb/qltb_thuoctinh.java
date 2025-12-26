@@ -17,19 +17,30 @@ package com.mycompany.qltb;
     private String ghiChu;
     private String tenLoai;
     private String tenTrangThai;
-    private int soLuong;
+    private int soLuongTot;  
+    private int soLuongHong;
     
     public qltb_thuoctinh() {}
 
-    public qltb_thuoctinh(String maTB, String tenTB, String tenLoai, String tenTrangThai,int soLuong) {
+    public qltb_thuoctinh(String maTB, String tenTB, String tenLoai, String tenTrangThai,int soLuongTot , int soLuongHong) {
         this.maTB = maTB;
         this.tenTB = tenTB;
         this.tenLoai = tenLoai;
         this.tenTrangThai = tenTrangThai;
-        this.soLuong = soLuong;
+        this.soLuongTot = soLuongTot;
+        this.soLuongHong = soLuongHong;
     }
 
+    public int getTongSoLuong() { 
+        return this.soLuongTot + this.soLuongHong; 
+    }
+    
 
+    public int getSoLuongTot() { return soLuongTot; }
+    public void setSoLuongTot(int soLuongTot) { this.soLuongTot = soLuongTot; }
+
+    public int getSoLuongHong() { return soLuongHong; }
+    public void setSoLuongHong(int soLuongHong) { this.soLuongHong = soLuongHong; }
     public String getMaTB() { return maTB; }
     public void setMaTB(String maTB) { this.maTB = maTB; }
 
@@ -44,8 +55,6 @@ package com.mycompany.qltb;
 
     public String getGhiChu() { return ghiChu; }
     public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
-    public int getSoLuong() { return soLuong; }
-    public void setSoLuong(int soLuong) { this.soLuong = soLuong; }
 
     public String gettenTrangThai() { return tenTrangThai; }
      public String gettenLoai() { return tenLoai; }

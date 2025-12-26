@@ -74,8 +74,8 @@ public class TraPhieuDialog extends JDialog {
             model.addRow(new Object[]{
                 tb.getMaTB(),
                 tb.getTenTB(),
-                tb.getSoLuong(), // Đây là số lượng ĐÃ MƯỢN lấy từ ctphieumuon
-                tb.getSoLuong(), // Mặc định SL Tốt = SL Mượn
+                tb.getSoLuongTot(), // Đây là số lượng ĐÃ MƯỢN lấy từ ctphieumuon
+                tb.getSoLuongTot(), // Mặc định SL Tốt = SL Mượn
                 0,               // Mặc định SL Hỏng = 0
                 ""
             });

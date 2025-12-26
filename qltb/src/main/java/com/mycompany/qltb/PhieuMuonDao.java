@@ -9,19 +9,20 @@ public class PhieuMuonDao {
     // 1. Lấy danh sách thiết bị đang SẴN SÀNG
     public List<qltb_thuoctinh> getThietBiSanSang() {
         List<qltb_thuoctinh> list = new ArrayList<>();
-        // Chỉ lấy những thiết bị còn số lượng > 0 và trạng thái Sẵn sàng (1), loại trừ trạng thái Dừng hoạt động (8)
-        String sql = "SELECT * FROM thietbi WHERE trangthai = 1 AND soluong > 0 AND trangthai != 8"; 
-        
+        // Chỉ lấy những thiết bị còn số lượng tốt > 0 và trạng thái Sẵn sàng (1), loại trừ trạng thái Dừng hoạt động (8)
+        String sql = "SELECT * FROM thietbi WHERE trangthai = 1 AND soluong_tot > 0 AND trangthai != 8";
+
         try (Connection c = new db().getConnection();
              Statement st = c.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
-             
+
             while (rs.next()) {
                 qltb_thuoctinh tb = new qltb_thuoctinh();
                 tb.setMaTB(rs.getString("matbi"));
                 tb.setTenTB(rs.getString("tentbi"));
                 tb.setMaLoai(rs.getString("maloai"));
-                tb.setSoLuong(rs.getInt("soluong")); 
+                tb.setSoLuongTot(rs.getInt("soluong_tot"));
+                tb.setSoLuongHong(rs.getInt("soluong_hong"));
                 list.add(tb);
             }
         } catch (Exception e) { e.printStackTrace(); }
@@ -43,8 +44,8 @@ public class PhieuMuonDao {
             psPhieu.executeUpdate();
 
             // Chuẩn bị câu lệnh update
-           // Không tự động set trạng thái về 1 khi trả, giữ nguyên trạng thái hiện tại
-           String sqlUpdateKho = "UPDATE thietbi SET soluong = soluong + ? WHERE matbi = ?";
+           // Khi trả: số lượng tốt -> cộng vào soluong_tot, số lượng hỏng -> cộng vào soluong_hong
+           String sqlUpdateKho = "UPDATE thietbi SET soluong_tot = soluong_tot + ?, soluong_hong = soluong_hong + ? WHERE matbi = ?";
             
             // Update chi tiết phiếu (Ghi nhận trạng thái trả vào cột ghi chú hoặc cột riêng nếu có)
             // Ở đây mình sẽ ghép chuỗi "Tốt: x, Hỏng: y" vào cột ghichu của ctphieumuon để lưu vết
@@ -54,12 +55,11 @@ public class PhieuMuonDao {
             psUpdateCT = c.prepareStatement(sqlUpdateCT);
 
             for (TraPhieuDialog.ChiTietTra item : listTra) {
-                // 2. CỘNG KHO (Chỉ cộng số lượng TỐT)
-                if (item.slTot > 0) {
-                    psUpdateKho.setInt(1, item.slTot);
-                    psUpdateKho.setString(2, item.maTB);
-                    psUpdateKho.addBatch();
-                }
+                // 2. CỘNG KHO (Cộng số lượng TỐT vào soluong_tot, số lượng HỎNG vào soluong_hong)
+                psUpdateKho.setInt(1, item.slTot);  // Cộng vào soluong_tot
+                psUpdateKho.setInt(2, item.slHong); // Cộng vào soluong_hong
+                psUpdateKho.setString(3, item.maTB);
+                psUpdateKho.addBatch();
 
                 // 3. Update trạng thái chi tiết
                 // 1 = Bình thường, 3 = Có hỏng hóc
@@ -122,8 +122,8 @@ public class PhieuMuonDao {
 
         // B. Insert CTPHIEUMUON (Thêm cột soluong) & Trừ Tồn Kho
         String sqlChiTiet = "INSERT INTO ctphieumuon(mapm, matbi, soluong, trangthai_luc_muon) VALUES (?, ?, ?, 1)";
-        // SQL trừ tồn kho
-        String sqlUpdateTB = "UPDATE thietbi SET soluong = soluong - ? WHERE matbi = ?";
+        // SQL trừ tồn kho (chỉ trừ từ soluong_tot khi mượn)
+        String sqlUpdateTB = "UPDATE thietbi SET soluong_tot = soluong_tot - ? WHERE matbi = ?";
 
         psChiTiet = c.prepareStatement(sqlChiTiet);
         psUpdateTB = c.prepareStatement(sqlUpdateTB);
@@ -168,66 +168,6 @@ public class PhieuMuonDao {
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 list.add(rs.getString("maphong"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public List<String> getAllTenPhong() {
-        List<String> list = new ArrayList<>();
-        String sql = "SELECT tenphong FROM phong ORDER BY tenphong";
-        try (Connection c = new db().getConnection();
-             Statement st = c.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(rs.getString("tenphong"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public String getMaPhongByTen(String tenPhong) {
-        String sql = "SELECT maphong FROM phong WHERE tenphong = ?";
-        try (Connection c = new db().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, tenPhong);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getString("maphong");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null; // Không tìm thấy
-    }
-
-    public String getTenPhongByMa(String maPhong) {
-        String sql = "SELECT tenphong FROM phong WHERE maphong = ?";
-        try (Connection c = new db().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, maPhong);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getString("tenphong");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null; // Không tìm thấy
-    }
-
-    public List<String> getAllTenLop() {
-        List<String> list = new ArrayList<>();
-        String sql = "SELECT tenlop FROM lop ORDER BY tenlop";
-        try (Connection c = new db().getConnection();
-             Statement st = c.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(rs.getString("tenlop"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -330,12 +270,13 @@ public class PhieuMuonDao {
                 tb.setMaTB(rs.getString("matbi"));
                 tb.setTenTB(rs.getString("tentbi"));
                 tb.setMaLoai(rs.getString("tenloai"));
-                tb.setSoLuong(rs.getInt("soluong")); // Số lượng mượn
+                tb.setSoLuongTot(rs.getInt("soluong")); // Số lượng mượn (lưu vào soLuongTot tạm thời)
+                tb.setSoLuongHong(0); // Không có thông tin hỏng khi mượn
 
                 // Tận dụng trường Ghi chú của đối tượng để lưu tình trạng trả
                 // Nếu null (chưa trả) thì để trống hoặc ghi "Đang mượn"
                 String tt = rs.getString("tinhtrang");
-                tb.setGhiChu(tt == null ? "Đang mượn" : tt); 
+                tb.setGhiChu(tt == null ? "Đang mượn" : tt);
 
                 list.add(tb);
             }
@@ -372,36 +313,6 @@ public class PhieuMuonDao {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getString("malop");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null; // Không tìm thấy
-    }
-
-    public String getMaLopByTen(String tenLop) {
-        String sql = "SELECT malop FROM lop WHERE tenlop = ?";
-        try (Connection c = new db().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, tenLop);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getString("malop");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null; // Không tìm thấy
-    }
-
-    public String getTenLopByMa(String maLop) {
-        String sql = "SELECT tenlop FROM lop WHERE malop = ?";
-        try (Connection c = new db().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, maLop);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getString("tenlop");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -460,5 +371,96 @@ public class PhieuMuonDao {
         } finally {
             try { if (c != null) c.close(); } catch (Exception e) {}
         }
+    }
+
+    // Phương thức bổ sung để lấy tên lớp và phòng
+    public List<String> getAllTenLop() {
+        List<String> list = new ArrayList<>();
+        String sql = "SELECT tenlop FROM lop";
+        try (Connection c = new db().getConnection();
+             Statement st = c.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(rs.getString("tenlop"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<String> getAllTenPhong() {
+        List<String> list = new ArrayList<>();
+        String sql = "SELECT tenphong FROM phong";
+        try (Connection c = new db().getConnection();
+             Statement st = c.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(rs.getString("tenphong"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public String getTenLopByMa(String maLop) {
+        String sql = "SELECT tenlop FROM lop WHERE malop = ?";
+        try (Connection c = new db().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, maLop);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("tenlop");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String getTenPhongByMa(String maPhong) {
+        String sql = "SELECT tenphong FROM phong WHERE maphong = ?";
+        try (Connection c = new db().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, maPhong);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("tenphong");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String getMaLopByTen(String tenLop) {
+        String sql = "SELECT malop FROM lop WHERE tenlop = ?";
+        try (Connection c = new db().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, tenLop);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("malop");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String getMaPhongByTen(String tenPhong) {
+        String sql = "SELECT maphong FROM phong WHERE tenphong = ?";
+        try (Connection c = new db().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, tenPhong);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("maphong");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

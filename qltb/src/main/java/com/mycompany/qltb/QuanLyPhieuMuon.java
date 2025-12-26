@@ -250,11 +250,11 @@ public class QuanLyPhieuMuon extends JFrame {
     List<qltb_thuoctinh> listTB = dao.getThietBiMuonByPhieu(maPM);
     
     for (qltb_thuoctinh tb : listTB) {
-        modelChiTietTB.addRow(new Object[]{ 
-            tb.getMaTB(), 
-            tb.getTenTB(), 
+        modelChiTietTB.addRow(new Object[]{
+            tb.getMaTB(),
+            tb.getTenTB(),
             tb.getMaLoai(),
-            tb.getSoLuong(), // Hiển thị số lượng
+            tb.getTongSoLuong(), // Hiển thị tổng số lượng
             tb.getGhiChu()   // Hiển thị tình trạng (VD: Trả: 5 Tốt, 0 Hỏng...)
         });
     }

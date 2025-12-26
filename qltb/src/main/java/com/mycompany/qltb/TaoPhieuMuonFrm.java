@@ -196,8 +196,8 @@ public class TaoPhieuMuonFrm extends JFrame {
         modelKho.setRowCount(0);
         List<qltb_thuoctinh> list = dao.getThietBiSanSang();
         for (qltb_thuoctinh tb : list) {
-            // Hiển thị cả số lượng tồn kho
-            modelKho.addRow(new Object[]{tb.getMaTB(), tb.getTenTB(), tb.getSoLuong()});
+            // Hiển thị cả số lượng tồn kho (chỉ hiển thị SL tốt có thể mượn)
+            modelKho.addRow(new Object[]{tb.getMaTB(), tb.getTenTB(), tb.getSoLuongTot()});
         }
     }
 
