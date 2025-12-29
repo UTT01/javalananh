@@ -9,17 +9,15 @@ package com.mycompany.qltb;
  * @author LanAnh
  */
 
-
 import javax.swing.*;
-
 
 public class menu {
 
-    public static JMenuBar createMainMenuBar(Runnable onNhapFile, Runnable onXuatFileTB,Runnable onLapPhieuMuon, Runnable onXuatPhieuMuon,
+    public static JMenuBar createMainMenuBar(Runnable onNhapFile, Runnable onXuatFileTB, Runnable onLapPhieuMuon, Runnable onXuatPhieuMuon,
                                              Runnable onOpenSinhVien, Runnable onOpenPhong, Runnable onOpenLopTinChi) {
         JMenuBar bar = new JMenuBar();
 
-        // Menu "Quản lý thiết bị"
+        // 1. Menu "Quản lý thiết bị" (Code cũ OK)
         JMenu menuQuanLyTB = new JMenu("Quản lý thiết bị");
         JMenuItem itemNhapFile = new JMenuItem("Nhập file");
         JMenuItem itemXuatFile = new JMenuItem("Xuất file");
@@ -30,29 +28,41 @@ public class menu {
         menuQuanLyTB.add(itemNhapFile);
         menuQuanLyTB.add(itemXuatFile);
 
-        // Menu "Phiếu mượn"
+        // 2. Menu "Phiếu mượn" (Code cũ OK)
         JMenu menuPhieuMuon = new JMenu("Phiếu mượn");
         JMenuItem itemLapPhieu = new JMenuItem("Lập phiếu mượn");
-        itemLapPhieu.addActionListener(e -> onLapPhieuMuon.run());
-        menuPhieuMuon.add(itemLapPhieu);
-        
         JMenuItem itemXuatPhieuMuon = new JMenuItem("Xuất file");
+        
+        itemLapPhieu.addActionListener(e -> onLapPhieuMuon.run());
         itemXuatPhieuMuon.addActionListener(e -> onXuatPhieuMuon.run());
+        
+        menuPhieuMuon.add(itemLapPhieu);
         menuPhieuMuon.add(itemXuatPhieuMuon);
 
-        // Menu "Quản lý sinh viên mượn"
-        JMenu menuSinhVienMuon = new JMenu("Quản lý sinh viên mượn");
-        menuSinhVienMuon.addActionListener(e -> onOpenSinhVien.run());
+        // =================================================================
+        // 3. Menu "Quản lý sinh viên mượn" (ĐÃ SỬA)
+        // Lỗi cũ: Gán actionListener trực tiếp vào JMenu -> Không chạy
+        // Sửa: Thêm JMenuItem con
+        JMenu menuSinhVienMuon = new JMenu("Quản lý sinh viên");
+        JMenuItem itemOpenSV = new JMenuItem("Danh sách sinh viên"); // Tạo item con
+        itemOpenSV.addActionListener(e -> onOpenSinhVien.run());     // Gán sự kiện vào item con
+        menuSinhVienMuon.add(itemOpenSV);                            // Thêm item vào menu cha
 
-        // Menu "Quản lý phòng"
+        // =================================================================
+        // 4. Menu "Quản lý phòng" (ĐÃ SỬA - Đây là chỗ bạn cần nhất)
         JMenu menuQuanLyPhong = new JMenu("Quản lý phòng");
-        menuQuanLyPhong.addActionListener(e -> onOpenPhong.run());
+        JMenuItem itemOpenPhong = new JMenuItem("Danh sách phòng");  // Tạo item con
+        itemOpenPhong.addActionListener(e -> onOpenPhong.run());     // Gán sự kiện vào item con
+        menuQuanLyPhong.add(itemOpenPhong);                          // Thêm item vào menu cha
 
-        // Menu "Lớp tín chỉ"
+        // =================================================================
+        // 5. Menu "Lớp tín chỉ" (ĐÃ SỬA)
         JMenu menuLopTinChi = new JMenu("Lớp tín chỉ");
-        menuLopTinChi.addActionListener(e -> onOpenLopTinChi.run());
+        JMenuItem itemOpenLTC = new JMenuItem("Danh sách lớp");      // Tạo item con
+        itemOpenLTC.addActionListener(e -> onOpenLopTinChi.run());   // Gán sự kiện vào item con
+        menuLopTinChi.add(itemOpenLTC);                              // Thêm item vào menu cha
 
-        // Thêm tất cả vào thanh menu
+        // Thêm tất cả vào thanh menu chính
         bar.add(menuQuanLyTB);
         bar.add(menuPhieuMuon);
         bar.add(menuSinhVienMuon);
@@ -62,4 +72,3 @@ public class menu {
         return bar;
     }
 }
-

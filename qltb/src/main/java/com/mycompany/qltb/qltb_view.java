@@ -73,20 +73,24 @@ public class qltb_view extends JFrame {
         setLocationRelativeTo(null);                      // Hiển thị giữa màn hình
         setLayout(new BorderLayout());                    // Dùng BorderLayout cho toàn bộ cửa sổ
        // gọi menu
-            setJMenuBar(menu.createMainMenuBar(
-                () -> { // Nhập file
-                    JFileChooser fc = new JFileChooser();
-                    if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                        FileUtils.loadDataFromFile(this, fc.getSelectedFile().getPath());
-                    }
-                },
-                () -> FileUtils.exportToFile(this, tableSp),
-                () -> new QuanLyPhieuMuon(this).setVisible(true),
-                () -> JOptionPane.showMessageDialog(this, "Xuất phiếu mượn..."),
-                () -> JOptionPane.showMessageDialog(this, "Mở form sinh viên mượn..."),
-                () -> JOptionPane.showMessageDialog(this, "Mở form quản lý phòng..."),
-                () -> JOptionPane.showMessageDialog(this, "Mở form lớp tín chỉ...")
-            ));
+setJMenuBar(menu.createMainMenuBar(
+    () -> { // Nhập file
+        JFileChooser fc = new JFileChooser();
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            FileUtils.loadDataFromFile(this, fc.getSelectedFile().getPath());
+        }
+    },
+    () -> FileUtils.exportToFile(this, tableSp),
+    () -> new QuanLyPhieuMuon(this).setVisible(true),
+    () -> JOptionPane.showMessageDialog(this, "Xuất phiếu mượn..."),
+    () -> JOptionPane.showMessageDialog(this, "Mở form sinh viên mượn..."),
+
+    () -> new QuanLyPhong().setVisible(true),
+    // --------------------
+
+    () -> JOptionPane.showMessageDialog(this, "Mở form lớp tín chỉ...")
+));
+
 
         // ===== Panel bên trái: Quản lý danh mục =====
         JPanel left = new JPanel(new BorderLayout());                 // Panel trái dùng BorderLayout
