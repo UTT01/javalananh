@@ -98,7 +98,10 @@ public class trangchu extends JFrame {
 
         // 5. XỬ LÝ SỰ KIỆN
         btnHome.addActionListener(e -> cardLayout.show(panelChinh, "HOME"));
-        btnQLTB.addActionListener(e -> cardLayout.show(panelChinh, "QLTB"));
+        btnQLTB.addActionListener(e -> {
+            cardLayout.show(panelChinh, "PHIEUMUON");
+            panelPhieuMuon.loadData();
+        });
         btnQLHS.addActionListener(e -> cardLayout.show(panelChinh, "QLHS"));
         
         btnPhieuMuon.addActionListener(e -> {

@@ -215,7 +215,7 @@ setJMenuBar(menu.createMainMenuBar(
         loadDanhMuc();
         loadtrangthai();
         loadtb();
-    setVisible(true);
+    
         // Panel nút bấm cho sản phẩm
         JPanel pbtn2 = new JPanel();
         btnthem = new JButton("Thêm");                                // Nút làm mới form sản phẩm     
