@@ -64,6 +64,11 @@ public class trangchu extends JFrame {
 
         // Trang quản lý phiếu mượn
         QuanLyPhieuMuonPanel panelPhieuMuon = new QuanLyPhieuMuonPanel(this);
+        panelChinh.add(panelPhieuMuon, "PHIEUMUON");
+        btnPhieuMuon.addActionListener(e -> {
+            cardLayout.show(panelChinh, "PHIEUMUON");
+            panelPhieuMuon.loadData();
+        });
         
         // --- SỬA Ở ĐÂY: Thay thế Panel tạm bằng Class QuanLyPhong ---
        // QuanLyPhong panelPhong = new QuanLyPhong(); 

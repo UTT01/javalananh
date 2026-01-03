@@ -21,18 +21,19 @@ public class QuanLyPhieuMuonPanel extends JPanel {
 
     // --- Component Bên Phải ---
     private JButton btnTaoMoi;
-    private JButton btnTraPhieu; // [MỚI] Nút Trả Phiếu
+    private JButton btnTraPhieu;
 
     private JTextField txtMaPM, txtMaHS, txtTenHS, txtNgayMuon, txtHanTra, txtGhiChu;
-    private JComboBox<String> cboTenLop; // ComboBox chọn tên lớp
-    private JComboBox<String> cboTenPhong; // ComboBox chọn tên phòng
+    private JComboBox<String> cboTenLop;
+    private JComboBox<String> cboTenPhong;
     private JTable tblChiTietTB;
     private DefaultTableModel modelChiTietTB;
     private JButton btnUpdate;
 
     private PhieuMuonDao dao = new PhieuMuonDao();
-    private trangchu parent;
+    private trangchu parent; // Tham chiếu về trang chủ
 
+    // Constructor nhận vào trangchu
     public QuanLyPhieuMuonPanel(trangchu parent) {
         this.parent = parent;
         initComponents();
@@ -51,7 +52,7 @@ public class QuanLyPhieuMuonPanel extends JPanel {
         pLeft.setPreferredSize(new Dimension(500, 0));
         pLeft.setBorder(BorderFactory.createTitledBorder("Danh sách phiếu mượn"));
 
-        // ... (Giữ nguyên phần tìm kiếm/lọc pFilter và tblPhieu như cũ) ...
+        // Bộ lọc tìm kiếm
         JPanel pFilter = new JPanel(new GridLayout(2, 1, 5, 5));
         JPanel pRow1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         txtSearch = new JTextField(15);
@@ -77,6 +78,7 @@ public class QuanLyPhieuMuonPanel extends JPanel {
         pFilter.add(pRow1); pFilter.add(pRow2);
         pLeft.add(pFilter, BorderLayout.NORTH);
 
+        // Bảng danh sách phiếu
         modelPhieu = new DefaultTableModel(new String[]{"Mã PM", "Tên HS", "Ngày mượn", "Trạng thái"}, 0) {
             @Override public boolean isCellEditable(int row, int col) { return false; }
         };
@@ -93,30 +95,26 @@ public class QuanLyPhieuMuonPanel extends JPanel {
         JPanel pRight = new JPanel(new BorderLayout());
         pRight.setBorder(BorderFactory.createTitledBorder("Chi tiết phiếu mượn"));
 
-        // --- Nút Chức Năng (Góc trên) ---
+        // --- Nút Chức Năng ---
         JPanel pRightTop = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-
-        // Nút Tạo Mới
         btnTaoMoi = new JButton("+ TẠO PHIẾU MỚI");
-        btnTaoMoi.setBackground(new Color(0, 153, 76)); // Xanh lá
+        btnTaoMoi.setBackground(new Color(0, 153, 76));
         btnTaoMoi.setForeground(Color.WHITE);
         btnTaoMoi.setFont(new Font("Arial", Font.BOLD, 12));
-        btnTaoMoi.addActionListener(e -> new TaoPhieuMuonFrm(this).setVisible(true));
+        btnTaoMoi.addActionListener(e -> new TaoPhieuMuonFrm(this).setVisible(true)); // Mở Form tạo mới
 
-        // [MỚI] Nút Trả Phiếu
         btnTraPhieu = new JButton("TRẢ PHIẾU / HOÀN TẤT");
-        btnTraPhieu.setBackground(new Color(0, 102, 204)); // Xanh dương
+        btnTraPhieu.setBackground(new Color(0, 102, 204));
         btnTraPhieu.setForeground(Color.WHITE);
         btnTraPhieu.setFont(new Font("Arial", Font.BOLD, 12));
-        btnTraPhieu.addActionListener(e -> xuLyTraPhieu()); // Gọi hàm xử lý
+        btnTraPhieu.addActionListener(e -> xuLyTraPhieu());
 
         pRightTop.add(btnTaoMoi);
         pRightTop.add(btnTraPhieu);
         pRight.add(pRightTop, BorderLayout.NORTH);
 
-        // --- Khu vực Form + Bảng ---
+        // --- Form chi tiết ---
         JPanel pCenterRight = new JPanel(new BorderLayout(5, 5));
-
         JPanel pForm = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5); gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -130,7 +128,6 @@ public class QuanLyPhieuMuonPanel extends JPanel {
         txtHanTra = new JTextField(15);
         txtGhiChu = new JTextField(15);
 
-        // Layout Form (như cũ)
         gbc.gridx=0; gbc.gridy=0; pForm.add(new JLabel("Mã Phiếu:"), gbc);
         gbc.gridx=1; pForm.add(txtMaPM, gbc);
         gbc.gridx=2; pForm.add(new JLabel("Mã HS:"), gbc);
@@ -150,7 +147,7 @@ public class QuanLyPhieuMuonPanel extends JPanel {
 
         pCenterRight.add(pForm, BorderLayout.NORTH);
 
-        // Bảng thiết bị
+        // Bảng thiết bị trong phiếu
         JPanel pTableDevice = new JPanel(new BorderLayout());
         pTableDevice.setBorder(BorderFactory.createTitledBorder("Các thiết bị trong phiếu này"));
         modelChiTietTB = new DefaultTableModel(new String[]{"Mã TB", "Tên TB", "Loại", "Số lượng", "Tình trạng"}, 0) {
@@ -164,7 +161,7 @@ public class QuanLyPhieuMuonPanel extends JPanel {
         pCenterRight.add(pTableDevice, BorderLayout.CENTER);
         pRight.add(pCenterRight, BorderLayout.CENTER);
 
-        // Nút cập nhật thông tin chung (như cũ)
+        // Nút Cập nhật
         JPanel pRightBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnUpdate = new JButton("CẬP NHẬT THÔNG TIN");
         btnUpdate.setPreferredSize(new Dimension(180, 35));
@@ -172,7 +169,7 @@ public class QuanLyPhieuMuonPanel extends JPanel {
         pRightBottom.add(btnUpdate);
         pRight.add(pRightBottom, BorderLayout.SOUTH);
 
-        // SplitPane
+        // SplitPane chia đôi màn hình
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, pLeft, pRight);
         splitPane.setDividerLocation(500);
         add(splitPane, BorderLayout.CENTER);
@@ -181,20 +178,15 @@ public class QuanLyPhieuMuonPanel extends JPanel {
     private void loadComboBoxLop() {
         cboTenLop.removeAllItems();
         List<String> listLop = dao.getAllTenLop();
-        for (String tenLop : listLop) {
-            cboTenLop.addItem(tenLop);
-        }
+        for (String tenLop : listLop) cboTenLop.addItem(tenLop);
     }
 
     private void loadComboBoxPhong() {
         cboTenPhong.removeAllItems();
         List<String> listPhong = dao.getAllTenPhong();
-        for (String tenPhong : listPhong) {
-            cboTenPhong.addItem(tenPhong);
-        }
+        for (String tenPhong : listPhong) cboTenPhong.addItem(tenPhong);
     }
 
-    // --- LOGIC LOAD DỮ LIỆU ---
     public void loadData() {
         modelPhieu.setRowCount(0);
         String keyword = txtSearch.getText().trim();
@@ -211,7 +203,6 @@ public class QuanLyPhieuMuonPanel extends JPanel {
         }
     }
 
-    // --- LOGIC HIỂN THỊ CHI TIẾT ---
     private void showDetail() {
         int row = tblPhieu.getSelectedRow();
         if (row == -1) return;
@@ -222,91 +213,64 @@ public class QuanLyPhieuMuonPanel extends JPanel {
             txtMaPM.setText(String.valueOf(pm.getMaPM()));
             txtMaHS.setText(pm.getMaHS());
             txtTenHS.setText(pm.getTenHS());
-            // Hiển thị tên lớp thay vì mã lớp
             String tenLop = dao.getTenLopByMa(pm.getMaLop());
-            if (tenLop != null) {
-                cboTenLop.setSelectedItem(tenLop);
-            }
-            // Hiển thị tên phòng thay vì mã phòng
+            if (tenLop != null) cboTenLop.setSelectedItem(tenLop);
             String tenPhong = dao.getTenPhongByMa(pm.getMaPhong());
-            if (tenPhong != null) {
-                cboTenPhong.setSelectedItem(tenPhong);
-            }
+            if (tenPhong != null) cboTenPhong.setSelectedItem(tenPhong);
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             txtNgayMuon.setText(pm.getNgayMuon() != null ? sdf.format(pm.getNgayMuon()) : "");
             txtHanTra.setText(pm.getHanTra() != null ? sdf.format(pm.getHanTra()) : "");
             txtGhiChu.setText(pm.getGhiChu());
 
-            // Nếu đã trả thì khóa nút trả
             btnTraPhieu.setEnabled(pm.getNgayTra() == null);
         }
 
         modelChiTietTB.setRowCount(0);
-    List<qltb_thuoctinh> listTB = dao.getThietBiMuonByPhieu(maPM);
-
-    for (qltb_thuoctinh tb : listTB) {
-        modelChiTietTB.addRow(new Object[]{
-            tb.getMaTB(),
-            tb.getTenTB(),
-            tb.getMaLoai(),
-            tb.getTongSoLuong(), // Hiển thị tổng số lượng
-            tb.getGhiChu()   // Hiển thị tình trạng (VD: Trả: 5 Tốt, 0 Hỏng...)
-        });
-    }
+        List<qltb_thuoctinh> listTB = dao.getThietBiMuonByPhieu(maPM);
+        for (qltb_thuoctinh tb : listTB) {
+            modelChiTietTB.addRow(new Object[]{
+                tb.getMaTB(), tb.getTenTB(), tb.getMaLoai(), tb.getTongSoLuong(), tb.getGhiChu()
+            });
+        }
     }
 
-    // --- [MỚI] LOGIC XỬ LÝ TRẢ PHIẾU ---
     private void xuLyTraPhieu() {
         if (txtMaPM.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Chưa chọn phiếu nào!");
             return;
         }
-
-        // Kiểm tra xem phiếu này đã trả chưa
         int row = tblPhieu.getSelectedRow();
-        if (row != -1) {
-            String status = tblPhieu.getValueAt(row, 3).toString();
-            if (status.equals("Đã trả")) {
-                JOptionPane.showMessageDialog(this, "Phiếu này đã trả rồi!");
-                return;
-            }
+        if (row != -1 && tblPhieu.getValueAt(row, 3).toString().equals("Đã trả")) {
+            JOptionPane.showMessageDialog(this, "Phiếu này đã trả rồi!");
+            return;
         }
-
         int maPM = Integer.parseInt(txtMaPM.getText());
-
-        // --- GỌI DIALOG TRẢ PHIẾU ---
-        // Đảm bảo bạn đã tạo file TraPhieuDialog.java mà tôi gửi ở câu trả lời trước
+        // Gọi Dialog Trả Phiếu
         TraPhieuDialog dialog = new TraPhieuDialog(this, maPM);
         dialog.setVisible(true);
     }
 
     private void updatePhieuMuon() {
-        // ... (Code cũ giữ nguyên) ...
         try {
+            if (txtMaPM.getText().isEmpty()) return;
              PhieuMuon pm = new PhieuMuon();
              pm.setMaPM(Integer.parseInt(txtMaPM.getText()));
              pm.setMaHS(txtMaHS.getText());
-             // Lấy mã lớp từ tên lớp được chọn
-             String tenLop = (String) cboTenLop.getSelectedItem();
-             String maLop = dao.getMaLopByTen(tenLop);
-             pm.setMaLop(maLop);
-             // Lấy mã phòng từ tên phòng được chọn
-             String tenPhong = (String) cboTenPhong.getSelectedItem();
-             String maPhong = dao.getMaPhongByTen(tenPhong);
-             pm.setMaPhong(maPhong);
+             pm.setMaLop(dao.getMaLopByTen((String) cboTenLop.getSelectedItem()));
+             pm.setMaPhong(dao.getMaPhongByTen((String) cboTenPhong.getSelectedItem()));
              pm.setGhiChu(txtGhiChu.getText());
-
+             
              SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
              Date d = sdf.parse(txtHanTra.getText());
              pm.setHanTra(new Timestamp(d.getTime()));
 
              if (dao.updatePhieuMuon(pm)) {
                  JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
-                 loadData();
+                 loadData(); 
              } else {
                  JOptionPane.showMessageDialog(this, "Cập nhật thất bại!");
              }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { e.printStackTrace(); JOptionPane.showMessageDialog(this, "Lỗi định dạng ngày!"); }
     }
 }

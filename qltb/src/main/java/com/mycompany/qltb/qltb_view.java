@@ -81,7 +81,14 @@ setJMenuBar(menu.createMainMenuBar(
         }
     },
     () -> FileUtils.exportToFile(this, tableSp),
-    () -> new QuanLyPhieuMuon(this).setVisible(true),
+    () -> {
+        try {
+            new QuanLyPhong().setVisible(true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi mở form phòng: " + ex.getMessage());
+        }
+    },
     () -> JOptionPane.showMessageDialog(this, "Xuất phiếu mượn..."),
     () -> JOptionPane.showMessageDialog(this, "Mở form sinh viên mượn..."),
 
