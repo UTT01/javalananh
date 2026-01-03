@@ -20,9 +20,9 @@ public class TaoPhieuMuonFrm extends JFrame {
     private JButton btnAdd, btnRemove, btnSave, btnCancel;
     
     private PhieuMuonDao dao = new PhieuMuonDao();
-    private QuanLyPhieuMuon parentScreen; 
+    private QuanLyPhieuMuonPanel parentScreen;
 
-    public TaoPhieuMuonFrm(QuanLyPhieuMuon parent) {
+    public TaoPhieuMuonFrm(QuanLyPhieuMuonPanel parent) {
         this.parentScreen = parent;
         initComponents();
         loadComboboxPhong();

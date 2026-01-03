@@ -13,10 +13,10 @@ public class TraPhieuDialog extends JDialog {
     private JButton btnLuu, btnHuy;
     private PhieuMuonDao dao = new PhieuMuonDao();
     private int maPM;
-    private QuanLyPhieuMuon parent;
+    private QuanLyPhieuMuonPanel parent;
 
-    public TraPhieuDialog(QuanLyPhieuMuon parent, int maPM) {
-        super(parent, "CHI TIẾT TRẢ THIẾT BỊ - Phiếu " + maPM, true);
+    public TraPhieuDialog(QuanLyPhieuMuonPanel parent, int maPM) {
+        super((JFrame)SwingUtilities.getWindowAncestor(parent), "CHI TIẾT TRẢ THIẾT BỊ - Phiếu " + maPM, true);
         this.parent = parent;
         this.maPM = maPM;
         setSize(800, 500);

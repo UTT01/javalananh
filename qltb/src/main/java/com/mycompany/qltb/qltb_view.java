@@ -377,19 +377,14 @@ setJMenuBar(menu.createMainMenuBar(
     }
 
 
-    // Mục đích: tải tất cả danh mục từ cơ sở dữ liệu và hiển thị lên JList + JComboBox
+
     public void loadDanhMuc() {
     listModelDm.clear();
     cboCategory.removeAllItems();  
     dmtb_dao dao = new dmtb_dao();
   List<dmtb_thuoctinh> dsDanhMuc = dao.getAll();
-   // Sử dụng đối tượng dao (thuộc lớp dmtb_dao) để gọi phương thức getAll()
-// Phương thức này lấy toàn bộ dữ liệu danh mục từ bảng "loaitb" trong cơ sở dữ liệu
-// Kết quả trả về được gán vào biến dsDanhMuc
-// Biến dsDanhMuc có kiểu là List<dmtb_thuoctinh> → tức là một danh sách các đối tượng dmtb_thuoctinh
+
     for (dmtb_thuoctinh dm : dsDanhMuc) {
-        // Thêm đối tượng danh mục vào mô hình của JList
-        // JList sẽ tự động gọi toString() của đối tượng để hiển thị tên
         listModelDm.addElement(dm);
         
         // Thêm cùng đối tượng đó vào JComboBox
